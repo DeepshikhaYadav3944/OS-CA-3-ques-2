@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Process {
+    char name[3];
+    int arrival_time;
+    int burst_time;
+};
+
+int main() {
+    struct Process processes[] = {
+        {"P1", 0, 20},
+        {"P2", 5, 36},
+        {"P3", 13, 19},
+        {"P4", 26, 42}
+    };
+
+    int time_unit = 0;
+    int quantum_1 = 6;
+    int quantum_2 = 10;
+    int num_processes = sizeof(processes) / sizeof(processes[0]);
+
+    int waiting_times[num_processes];
+    int turnaround_times[num_processes];
+
+    for (int i = 0; i < num_processes; i++) {
+        waiting_times[i] = 0;
+        turnaround_times[i] = 0;
+    }
+
+    while (num_processes > 0) {
+        for (int i = 0; i < num_processes; i++) {
+            if (processes[i].burst_time <= 0) {
+                continue;
+            }
+
+            if (time_unit % quantum_1 == 0) {
+                if (processes[i].burst_time <= 0) {
+                    continue;
+                }
+                processes[i].burst_time -= quantum_1;
+                waiting_times[i] += time_unit - processes[i].arrival_time;
+            }
+
+            if (time_unit % quantum_2 == 0) {
+                if (processes[i].burst_time <= 0) {
+                    continue;
+                }
+                processes[i].burst_time -= quantum_2;
+                waiting_times[i] += time_unit - processes[i].arrival_time;
+            }
+
+            if (processes[i].burst_time <= 0) {
+                turnaround_times[i] = time_unit - processes[i].arrival_time;
+                num_processes--;
+            }
+
+            time_unit++;
+        }
+    }
+
+    // Compute averages
+    float average_waiting_time = 0;
+    float average_turnaround_time = 0;
+    for (int i = 0; i < num_processes; i++) {
+        average_waiting_time += waiting_times[i];
+        average_turnaround_time += turnaround_times[i];
+    }
+    average_waiting_time /= num_processes;
+    average_turnaround_time /= num_processes;
+
+    // Display results
+    printf("Waiting Times:\n");
+    for (int i = 0; i < num_processes; i++) {
+        printf("%s: %d\n", processes[i].name, waiting_times[i]);
+    }
+    printf("Turnaround Times:\n");
+    for (int i = 0; i < num_processes; i++) {
+        printf("%s: %d\n", processes[i].name, turnaround_times[i]);
+    }
+    printf("Average Waiting Time: %f\n", average_waiting_time);
+    printf("Average Turnaround Time: %f\n", average_turnaround_time);
+
+    return 0;
+}
